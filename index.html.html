@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>岡山廣島之旅 | Travel Plan</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Noto Sans TC (Traditional Chinese) & Lato (English) -->
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind Config for MUJI Style -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        muji: {
+                            bg: '#f5f5f0',      /* 米色背景 */
+                            card: '#ffffff',    /* 純白卡片 */
+                            text: '#44403c',    /* 深石灰文字 */
+                            sub: '#78716c',     /* 淺灰副標 */
+                            accent: '#8E354A',  /* 傳統日式紅 (茜色) - 用於重點 */
+                            highlight: '#d6d3d1' /* 裝飾線條 */
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Lato"', '"Noto Sans TC"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f5f5f0;
+            color: #44403c;
+            -webkit-tap-highlight-color: transparent;
+            padding-bottom: 80px; /* Space for bottom nav */
+        }
+        
+        /* Hide Scrollbar but keep functionality */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Smooth Tab Transition */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Timeline Dots */
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            background-color: #d6d3d1;
+            border-radius: 50%;
+            position: absolute;
+            left: -6px;
+            top: 6px;
+            border: 2px solid #f5f5f0;
+        }
+        .timeline-dot.important {
+            background-color: #8E354A;
+            width: 16px;
+            height: 16px;
+            left: -8px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 w-full bg-muji-bg/90 backdrop-blur-md z-50 px-6 py-4 border-b border-stone-200 shadow-sm">
+        <div class="flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-wide text-muji-text">Travel<span class="font-light">Plan</span></h1>
+            <span class="text-xs text-muji-sub bg-stone-200 px-2 py-1 rounded">岡山・廣島</span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="mt-20 px-4 max-w-md mx-auto">
+
+        <!-- ================= PLAN MODULE ================= -->
+        <section id="plan" class="tab-content active">
+            <!-- Day Selector -->
+            <div class="flex overflow-x-auto space-x-3 pb-4 no-scrollbar mb-2" id="day-selector">
+                <!-- Javascript will inject days here -->
+            </div>
+
+            <!-- Itinerary Container -->
+            <div id="itinerary-list" class="space-y-6 ml-2 border-l-2 border-stone-300 pl-6 relative">
+                <!-- Javascript will inject timeline items here -->
+            </div>
+        </section>
+
+        <!-- ================= GUIDE MODULE ================= -->
+        <section id="guide" class="tab-content">
+            <h2 class="text-2xl font-serif font-bold mb-6 text-muji-text">深度導覽</h2>
+            <div id="guide-list" class="space-y-8">
+                <!-- Javascript will inject guide cards here -->
+            </div>
+        </section>
+
+        <!-- ================= WALLET MODULE ================= -->
+        <section id="wallet" class="tab-content">
+            <!-- Exchange Rate Calculator -->
+            <div class="bg-muji-card rounded-xl p-5 shadow-sm mb-6">
+                <h3 class="text-sm font-bold text-muji-sub mb-3"><i class="fas fa-calculator mr-2"></i>匯率計算機</h3>
+                
+                <div class="flex items-center space-x-2 mb-3">
+                    <span class="text-xs text-stone-500">匯率 (JPY to TWD):</span>
+                    <input type="number" id="exchange-rate" value="0.22" step="0.001" class="w-20 bg-stone-100 rounded px-2 py-1 text-sm text-center focus:outline-none focus:ring-1 focus:ring-muji-sub">
+                </div>
+
+                <div class="bg-stone-100 rounded-lg p-3 mb-3 text-right">
+                    <div id="calc-expression" class="text-xs text-stone-400 h-4"></div>
+                    <input type="text" id="calc-input" placeholder="輸入算式 (如 500*2)" class="w-full bg-transparent text-right text-2xl font-bold text-muji-text outline-none placeholder-stone-300">
+                    <div class="text-muji-accent text-sm mt-1 font-medium">≈ NT$ <span id="twd-result">0</span></div>
+                </div>
+
+                <div class="grid grid-cols-4 gap-2">
+                    <button onclick="calcAppend('7')" class="bg-stone-50 p-3 rounded text-lg font-medium">7</button>
+                    <button onclick="calcAppend('8')" class="bg-stone-50 p-3 rounded text-lg font-medium">8</button>
+                    <button onclick="calcAppend('9')" class="bg-stone-50 p-3 rounded text-lg font-medium">9</button>
+                    <button onclick="calcAction('DEL')" class="bg-red-50 text-red-400 p-3 rounded text-sm"><i class="fas fa-backspace"></i></button>
+
+                    <button onclick="calcAppend('4')" class="bg-stone-50 p-3 rounded text-lg font-medium">4</button>
+                    <button onclick="calcAppend('5')" class="bg-stone-50 p-3 rounded text-lg font-medium">5</button>
+                    <button onclick="calcAppend('6')" class="bg-stone-50 p-3 rounded text-lg font-medium">6</button>
+                    <button onclick="calcAppend('+')" class="bg-stone-200 p-3 rounded text-lg text-muji-sub">+</button>
+
+                    <button onclick="calcAppend('1')" class="bg-stone-50 p-3 rounded text-lg font-medium">1</button>
+                    <button onclick="calcAppend('2')" class="bg-stone-50 p-3 rounded text-lg font-medium">2</button>
+                    <button onclick="calcAppend('3')" class="bg-stone-50 p-3 rounded text-lg font-medium">3</button>
+                    <button onclick="calcAppend('-')" class="bg-stone-200 p-3 rounded text-lg text-muji-sub">-</button>
+
+                    <button onclick="calcAppend('0')" class="bg-stone-50 p-3 rounded text-lg font-medium">0</button>
+                    <button onclick="calcAppend('.')" class="bg-stone-50 p-3 rounded text-lg font-medium">.</button>
+                    <button onclick="calcResult()" class="col-span-1 bg-muji-accent text-white p-3 rounded text-lg shadow-md">=</button>
+                    <button onclick="calcAppend('*')" class="bg-stone-200 p-3 rounded text-lg text-muji-sub">×</button>
+                </div>
+            </div>
+
+            <!-- Expense Tracker -->
+            <div class="bg-muji-card rounded-xl p-5 shadow-sm">
+                <h3 class="text-sm font-bold text-muji-sub mb-4 border-b pb-2"><i class="fas fa-receipt mr-2"></i>快速記帳</h3>
+                
+                <div class="flex space-x-2 mb-3">
+                    <input type="text" id="expense-item" placeholder="品項" class="flex-1 bg-stone-50 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-muji-sub">
+                    <input type="number" id="expense-amount" placeholder="日幣" class="w-24 bg-stone-50 rounded px-3 py-2 outline-none focus:ring-1 focus:ring-muji-sub">
+                </div>
+
+                <div class="flex justify-between items-center mb-4">
+                    <label class="flex items-center space-x-2 text-stone-500 text-sm cursor-pointer bg-stone-100 px-3 py-2 rounded-lg hover:bg-stone-200 transition">
+                        <i class="fas fa-camera"></i>
+                        <span>照片 (選填)</span>
+                        <input type="file" id="expense-photo" accept="image/*" capture="environment" class="hidden" onchange="previewImage()">
+                    </label>
+                    <button onclick="addExpense()" class="bg-muji-text text-white px-6 py-2 rounded-lg shadow hover:bg-stone-700 transition">新增</button>
+                </div>
+                <div id="photo-preview-container" class="hidden mb-4">
+                    <p class="text-xs text-stone-400 mb-1">照片預覽：</p>
+                    <img id="photo-preview" src="" class="h-20 rounded shadow-sm border border-stone-200">
+                </div>
+
+                <!-- Expense List -->
+                <div class="space-y-3" id="expense-list">
+                    <!-- JS Injected -->
+                </div>
+                
+                <div class="mt-4 pt-3 border-t flex justify-between items-end">
+                    <span class="text-xs text-stone-500">總支出</span>
+                    <div class="text-right">
+                        <div class="text-lg font-bold text-muji-text">¥ <span id="total-jpy">0</span></div>
+                        <div class="text-xs text-stone-400">≈ NT$ <span id="total-twd">0</span></div>
+                    </div>
+                </div>
+                <button onclick="clearExpenses()" class="w-full mt-4 text-xs text-red-300 hover:text-red-500">清空記帳資料</button>
+            </div>
+        </section>
+
+        <!-- ================= LISTS MODULE ================= -->
+        <section id="lists" class="tab-content">
+            
+            <!-- Checklist -->
+            <div class="bg-muji-card rounded-xl p-5 shadow-sm mb-6">
+                <h3 class="text-lg font-bold text-muji-text mb-4">行前準備清單</h3>
+                <div class="flex space-x-2 mb-4">
+                    <input type="text" id="checklist-input" placeholder="新增待辦事項..." class="flex-1 bg-stone-50 rounded px-3 py-2 outline-none">
+                    <button onclick="addChecklist()" class="bg-stone-200 text-stone-600 px-4 rounded hover:bg-stone-300"><i class="fas fa-plus"></i></button>
+                </div>
+                <ul id="checklist-container" class="space-y-2">
+                    <!-- JS Injected -->
+                </ul>
+            </div>
+
+            <!-- Memo -->
+            <div class="bg-muji-card rounded-xl p-5 shadow-sm">
+                <h3 class="text-lg font-bold text-muji-text mb-4">個人備忘錄</h3>
+                <p class="text-xs text-stone-400 mb-2">輸入網址會自動轉換為連結按鈕</p>
+                <textarea id="memo-area" rows="8" class="w-full bg-stone-50 rounded-lg p-3 text-sm leading-relaxed outline-none focus:ring-1 focus:ring-muji-sub resize-none" placeholder="輸入筆記..."></textarea>
+                <div id="memo-links" class="mt-3 flex flex-wrap gap-2"></div>
+            </div>
+        </section>
+
+        <!-- ================= INFO MODULE ================= -->
+        <section id="info" class="tab-content">
+            <h2 class="text-2xl font-serif font-bold mb-6 text-muji-text">實用資訊</h2>
+            
+            <div class="grid gap-4">
+                <!-- Weather -->
+                <a href="https://www.jma.go.jp/bosai/forecast/" target="_blank" class="bg-white p-4 rounded-xl shadow-sm flex items-center justify-between group">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-400">
+                            <i class="fas fa-cloud-sun-rain"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-muji-text">日本氣象廳</div>
+                            <div class="text-xs text-stone-500">查看天氣預報</div>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right text-stone-300 group-hover:text-stone-500"></i>
+                </a>
+
+                <!-- Emergency -->
+                <div class="bg-white p-5 rounded-xl shadow-sm">
+                    <h3 class="font-bold text-muji-text mb-3 border-b pb-2">緊急聯絡</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-stone-600"><i class="fas fa-taxi mr-2 w-5"></i>警察局</span>
+                            <a href="tel:110" class="text-muji-accent font-bold">110</a>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-stone-600"><i class="fas fa-ambulance mr-2 w-5"></i>救護車/火警</span>
+                            <a href="tel:119" class="text-muji-accent font-bold">119</a>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-stone-600"><i class="fas fa-globe mr-2 w-5"></i>外交部緊急</span>
+                            <a href="tel:0800085095" class="text-muji-accent font-bold">0800-085-095</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips -->
+                <div class="bg-white p-5 rounded-xl shadow-sm">
+                    <h3 class="font-bold text-muji-text mb-3 border-b pb-2">旅遊貼士</h3>
+                    <ul class="list-disc list-inside text-sm text-stone-600 space-y-2">
+                        <li>日本電壓 100V，插座為雙平腳（與台灣相同）。</li>
+                        <li>垃圾請務必分類，或帶回飯店丟棄。</li>
+                        <li>搭乘手扶梯：岡山/廣島多為靠左站立。</li>
+                        <li>租車：務必攜帶台灣駕照 + 日文譯本。</li>
+                        <li>退稅：同一天同一店消費滿 5000 日圓 (未稅) 可退稅。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 w-full bg-white border-t border-stone-200 pb-safe shadow-[0_-5px_10px_rgba(0,0,0,0.02)] z-50">
+        <div class="flex justify-around items-center h-16 max-w-md mx-auto">
+            <button onclick="switchTab('plan')" class="nav-btn active flex flex-col items-center justify-center w-full h-full text-stone-400 hover:text-muji-text transition-colors">
+                <i class="fas fa-map-marked-alt text-lg mb-1"></i>
+                <span class="text-[10px] font-medium">行程</span>
+            </button>
+            <button onclick="switchTab('guide')" class="nav-btn flex flex-col items-center justify-center w-full h-full text-stone-400 hover:text-muji-text transition-colors">
+                <i class="fas fa-book-open text-lg mb-1"></i>
+                <span class="text-[10px] font-medium">導覽</span>
+            </button>
+            <button onclick="switchTab('wallet')" class="nav-btn flex flex-col items-center justify-center w-full h-full text-stone-400 hover:text-muji-text transition-colors">
+                <div class="w-12 h-12 bg-muji-bg rounded-full flex items-center justify-center -mt-6 border border-stone-200 shadow-sm text-muji-accent">
+                    <i class="fas fa-wallet text-xl"></i>
+                </div>
+            </button>
+            <button onclick="switchTab('lists')" class="nav-btn flex flex-col items-center justify-center w-full h-full text-stone-400 hover:text-muji-text transition-colors">
+                <i class="fas fa-clipboard-check text-lg mb-1"></i>
+                <span class="text-[10px] font-medium">清單</span>
+            </button>
+            <button onclick="switchTab('info')" class="nav-btn flex flex-col items-center justify-center w-full h-full text-stone-400 hover:text-muji-text transition-colors">
+                <i class="fas fa-info-circle text-lg mb-1"></i>
+                <span class="text-[10px] font-medium">資訊</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // ================= DATA =================
+        const itinerary = {
+            "Day 1": {
+                date: "12/28 (日)",
+                title: "抵達岡山",
+                events: [
+                    { time: "11:10", title: "起飛 TPE", desc: "IT214 航班 (行李 60kg)", type: "flight", icon: "fa-plane-departure" },
+                    { time: "14:35", title: "抵達 OKJ", desc: "桃太郎機場入境", type: "flight", icon: "fa-plane-arrival" },
+                    { time: "15:00", title: "機場巴士", desc: "前往岡山車站 (約30分)", type: "transport", icon: "fa-bus" },
+                    { time: "16:00", title: "飯店 Check-in", desc: "Daiwa Roynet Hotel Okayama Station", type: "hotel", icon: "fa-bed", link: "https://maps.app.goo.gl/OkayamaStation" },
+                    { time: "17:00", title: "AEON Mall 逛街", desc: "無印良品、大創、UNIQLO", type: "activity", icon: "fa-shopping-bag" },
+                    { time: "19:30", title: "晚餐：壽喜燒", desc: "Hitorinabe Megu (已訂位)", type: "food", icon: "fa-utensils", link: "https://www.google.com/maps/search/?api=1&query=Shabu-shabu+Sukiyaki+Hitorinabe+Megu+Okayama" }
+                ]
+            },
+            "Day 2": {
+                date: "12/29 (一)",
+                title: "岡山 → 尾道",
+                events: [
+                    { time: "08:00", title: "岡山後樂園 & 岡山城", desc: "搭路面電車至「城下」站", type: "activity", icon: "fa-tree", link: "https://www.google.com/maps/search/?api=1&query=Okayama+Korakuen" },
+                    { time: "10:00", title: "租車自駕", desc: "Toyota Rent a Car 岡山站前店 (重要!)", type: "important", icon: "fa-car", link: "https://www.google.com/maps/search/?api=1&query=Toyota+Rent+a+Car+Okayama+Station" },
+                    { time: "10:30", title: "前往尾道", desc: "自駕約 1.5 小時", type: "transport", icon: "fa-road" },
+                    { time: "13:30", title: "千光寺、貓之細道", desc: "纜車單程 500日圓，走路下山", type: "activity", icon: "fa-cat" },
+                    { time: "18:00", title: "尾道國際飯店", desc: "自駕前往，附近有超市", type: "hotel", icon: "fa-bed" }
+                ]
+            },
+            "Day 3": {
+                date: "12/30 (二)",
+                title: "宮島一日遊",
+                events: [
+                    { time: "10:00", title: "前往宮島口", desc: "自駕約 1hr 40min", type: "transport", icon: "fa-car" },
+                    { time: "12:00", title: "渡輪 & 嚴島神社", desc: "看海上大鳥居", type: "activity", icon: "fa-torii-gate", link: "https://www.google.com/maps/search/?api=1&query=Itsukushima+Jinju" },
+                    { time: "13:30", title: "午餐：牡蠣", desc: "表參道商店街吃吃喝喝", type: "food", icon: "fa-utensils" },
+                    { time: "15:00", title: "紅葉谷公園", desc: "散步消化", type: "activity", icon: "fa-leaf" },
+                    { time: "17:30", title: "返回尾道", desc: "吃晚餐", type: "transport", icon: "fa-car" }
+                ]
+            },
+            "Day 4": {
+                date: "12/31 (三)",
+                title: "倉敷美觀",
+                events: [
+                    { time: "10:00", title: "尾道本通商店街", desc: "最後晃晃", type: "activity", icon: "fa-store" },
+                    { time: "12:00", title: "前往倉敷", desc: "姊夫還車，入住 Dormy Inn", type: "hotel", icon: "fa-bed", link: "https://www.google.com/maps/search/?api=1&query=Dormy+Inn+Kurashiki" },
+                    { time: "14:30", title: "倉敷美觀地區", desc: "阿智神社、白壁建築", type: "activity", icon: "fa-camera-retro", link: "https://www.google.com/maps/search/?api=1&query=Kurashiki+Bikan+Historical+Quarter" },
+                    { time: "21:00", title: "跨年夜", desc: "飯店免費拉麵 & 溫泉", type: "food", icon: "fa-bowl-food" }
+                ]
+            },
+            "Day 5": {
+                date: "01/01 (四)",
+                title: "返台",
+                events: [
+                    { time: "11:30", title: "前往機場", desc: "倉敷站北口巴士 (11:55發車)", type: "transport", icon: "fa-bus" },
+                    { time: "12:35", title: "抵達機場", desc: "最後伴手禮採買", type: "activity", icon: "fa-gift" },
+                    { time: "15:25", title: "起飛 OKJ", desc: "IT215 航班", type: "flight", icon: "fa-plane-departure" },
+                    { time: "17:30", title: "抵達 TPE", desc: "溫暖的家", type: "flight", icon: "fa-home" }
+                ]
+            }
+        };
+
+        const guides = [
+            {
+                title: "嚴島神社",
+                subtitle: "人與神共存的島嶼",
+                content: "建於西元593年，主要供奉三位海洋女神。最著名的「大鳥居」矗立於海中，漲潮時彷彿浮在水面，退潮時則可步行至鳥居下方。這裡被視為神之島，島上的鹿也被視為神的使者。",
+                tag: "世界遺產",
+                map: "https://www.openstreetmap.org/export/embed.html?bbox=132.315,34.295,132.325,34.300&layer=mapnik&marker=34.297,132.319"
+            },
+            {
+                title: "倉敷美觀地區",
+                subtitle: "江戶時代的白壁倉庫群",
+                content: "1642年成為幕府直轄地，因運送米糧而繁榮。保留了白壁土藏建築與柳樹成蔭的倉敷川，充滿懷舊氛圍。夜間點燈後更有另一番風味。",
+                tag: "歷史街道",
+                map: "https://www.openstreetmap.org/export/embed.html?bbox=133.765,34.593,133.775,34.598&layer=mapnik&marker=34.595,133.770"
+            },
+            {
+                title: "千光寺與貓之細道",
+                subtitle: "尾道的山城風光",
+                content: "尾道地形多山面海，千光寺位於山腰，可眺望瀨戶內海絕景。下山途中的「貓之細道」有許多福石貓與真實的貓咪出沒，是貓奴必訪聖地。",
+                tag: "攝影熱點",
+                map: null
+            },
+            {
+                title: "岡山後樂園",
+                subtitle: "日本三大名園之一",
+                content: "獲得米其林綠色指南三星評價。廣闊的草坪與流經園內的水路是其特色，四季皆有不同花卉盛開。與鄰近的「烏城」岡山城形成強烈對比。",
+                tag: "庭園",
+                map: null
+            }
+        ];
+
+        // ================= INITIALIZATION =================
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPlan('Day 1');
+            renderDaySelector();
+            renderGuide();
+            initWallet();
+            initLists();
+            
+            // Restore last active tab if possible, or default to plan
+            // switchTab('plan'); 
+        });
+
+        // ================= NAVIGATION =================
+        function switchTab(tabId) {
+            // Hide all sections
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            // Show target
+            document.getElementById(tabId).classList.add('active');
+            
+            // Update buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-muji-text', 'active');
+                btn.classList.add('text-stone-400');
+            });
+            // Highlight active button (need a way to select specific button)
+            const activeBtn = document.querySelector(`button[onclick="switchTab('${tabId}')"]`);
+            if(activeBtn) {
+                activeBtn.classList.remove('text-stone-400');
+                activeBtn.classList.add('text-muji-text', 'active');
+            }
+        }
+
+        // ================= PLAN MODULE LOGIC =================
+        function renderDaySelector() {
+            const container = document.getElementById('day-selector');
+            Object.keys(itinerary).forEach((day, index) => {
+                const btn = document.createElement('button');
+                btn.className = `day-btn whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold transition-all ${index === 0 ? 'bg-muji-text text-white shadow-md' : 'bg-white text-stone-500 border border-stone-200'}`;
+                btn.innerText = day;
+                btn.onclick = () => {
+                    // Update styles
+                    document.querySelectorAll('.day-btn').forEach(b => {
+                        b.className = 'day-btn whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold transition-all bg-white text-stone-500 border border-stone-200';
+                    });
+                    btn.className = 'day-btn whitespace-nowrap px-4 py-2 rounded-full text-sm font-bold transition-all bg-muji-text text-white shadow-md';
+                    renderPlan(day);
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function renderPlan(dayKey) {
+            const container = document.getElementById('itinerary-list');
+            const data = itinerary[dayKey];
+            
+            container.innerHTML = `<h3 class="text-xl font-bold mb-4 ml-[-10px] text-muji-text">${data.date} <span class="text-base font-normal text-stone-500">${data.title}</span></h3>`;
+
+            data.events.forEach(event => {
+                const isImportant = event.type === 'important';
+                const card = document.createElement('div');
+                card.className = "relative pl-6 pb-2 group";
+                
+                let linkHtml = '';
+                if(event.link) {
+                    linkHtml = `<a href="${event.link}" target="_blank" class="absolute top-2 right-2 text-stone-300 hover:text-muji-accent"><i class="fas fa-map-marked-alt text-lg"></i></a>`;
+                }
+
+                card.innerHTML = `
+                    <div class="timeline-dot ${isImportant ? 'important' : ''}"></div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-stone-100 ${isImportant ? 'border-l-4 border-l-muji-accent' : ''}">
+                        ${linkHtml}
+                        <div class="flex items-center mb-1">
+                            <div class="w-16 font-mono text-sm font-bold text-stone-500">${event.time}</div>
+                            <div class="text-xs px-2 py-0.5 rounded bg-stone-100 text-stone-500 ml-2"><i class="fas ${event.icon}"></i></div>
+                        </div>
+                        <h4 class="text-lg font-bold text-muji-text ${isImportant ? 'text-muji-accent' : ''}">${event.title}</h4>
+                        <p class="text-sm text-stone-600 mt-1 leading-relaxed">${event.desc}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ================= GUIDE MODULE LOGIC =================
+        function renderGuide() {
+            const container = document.getElementById('guide-list');
+            guides.forEach(guide => {
+                const article = document.createElement('article');
+                article.className = "bg-white rounded-xl overflow-hidden shadow-sm";
+                
+                let mapHtml = '';
+                if(guide.map) {
+                    mapHtml = `<div class="h-48 w-full bg-stone-200"><iframe width="100%" height="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="${guide.map}"></iframe></div>`;
+                } else {
+                    // Placeholder pattern if no map
+                    mapHtml = `<div class="h-32 w-full bg-stone-100 flex items-center justify-center text-stone-300"><i class="fas fa-image text-4xl"></i></div>`;
+                }
+
+                article.innerHTML = `
+                    ${mapHtml}
+                    <div class="p-6">
+                        <span class="text-xs tracking-widest uppercase text-muji-accent font-bold mb-2 block">${guide.tag}</span>
+                        <h3 class="text-xl font-serif font-bold text-muji-text mb-1">${guide.title}</h3>
+                        <h4 class="text-sm text-stone-500 mb-4 font-light border-b border-stone-100 pb-2">${guide.subtitle}</h4>
+                        <p class="text-sm text-stone-600 leading-7 text-justify">${guide.content}</p>
+                    </div>
+                `;
+                container.appendChild(article);
+            });
+        }
+
+        // ================= WALLET MODULE LOGIC =================
+        let calcInput = "";
+
+        function initWallet() {
+            loadExpenses();
+            // Input listener for calculator to update TWD in real time if simple number
+            document.getElementById('calc-input').addEventListener('input', (e) => {
+                calcInput = e.target.value;
+                updateCalcPreview();
+            });
+        }
+
+        function calcAppend(val) {
+            calcInput += val;
+            updateCalcDisplay();
+        }
+
+        function calcAction(action) {
+            if(action === 'DEL') {
+                calcInput = calcInput.toString().slice(0, -1);
+                updateCalcDisplay();
+            }
+        }
+
+        function updateCalcDisplay() {
+            document.getElementById('calc-input').value = calcInput;
+            updateCalcPreview();
+        }
+
+        function updateCalcPreview() {
+            try {
+                // Safe eval replacement
+                if(!calcInput) {
+                    document.getElementById('twd-result').innerText = "0";
+                    return;
+                }
+                // Allow only numbers and operators
+                if(/^[0-9+\-*/().\s]+$/.test(calcInput)) {
+                    const result = Function('"use strict";return (' + calcInput + ')')();
+                    const rate = parseFloat(document.getElementById('exchange-rate').value) || 0.22;
+                    document.getElementById('twd-result').innerText = Math.round(result * rate).toLocaleString();
+                    document.getElementById('calc-expression').innerText = "";
+                }
+            } catch (e) {
+                // Incomplete expression, ignore
+            }
+        }
+
+        function calcResult() {
+            try {
+                const result = Function('"use strict";return (' + calcInput + ')')();
+                document.getElementById('calc-expression').innerText = calcInput + " =";
+                calcInput = result.toString();
+                document.getElementById('calc-input').value = calcInput;
+                updateCalcPreview();
+            } catch(e) {
+                document.getElementById('calc-input').value = "Error";
+                calcInput = "";
+            }
+        }
+
+        // --- Expense Tracker ---
+        function previewImage() {
+            const file = document.getElementById('expense-photo').files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('photo-preview').src = e.target.result;
+                    document.getElementById('photo-preview-container').classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function addExpense() {
+            const item = document.getElementById('expense-item').value;
+            const amount = parseFloat(document.getElementById('expense-amount').value);
+            const fileInput = document.getElementById('expense-photo');
+            
+            if(!item || !amount) {
+                alert("請輸入品項與金額");
+                return;
+            }
+
+            let photoBase64 = null;
+            if(fileInput.files[0]) {
+                photoBase64 = await compressImage(fileInput.files[0]);
+            }
+
+            const expense = {
+                id: Date.now(),
+                item,
+                amount,
+                date: new Date().toLocaleDateString(),
+                photo: photoBase64
+            };
+
+            const expenses = JSON.parse(localStorage.getItem('trip_expenses') || '[]');
+            expenses.unshift(expense); // Add to top
+            localStorage.setItem('trip_expenses', JSON.stringify(expenses));
+
+            // Reset Form
+            document.getElementById('expense-item').value = "";
+            document.getElementById('expense-amount').value = "";
+            document.getElementById('expense-photo').value = "";
+            document.getElementById('photo-preview-container').classList.add('hidden');
+            
+            loadExpenses();
+        }
+
+        function compressImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 300; // Small thumbnail size
+                        const scaleSize = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scaleSize;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        // Compress to JPEG 0.5 quality
+                        resolve(canvas.toDataURL('image/jpeg', 0.5));
+                    }
+                }
+            });
+        }
+
+        function loadExpenses() {
+            const expenses = JSON.parse(localStorage.getItem('trip_expenses') || '[]');
+            const container = document.getElementById('expense-list');
+            const rate = parseFloat(document.getElementById('exchange-rate').value) || 0.22;
+            
+            container.innerHTML = "";
+            let totalJPY = 0;
+
+            expenses.forEach(ex => {
+                totalJPY += ex.amount;
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between bg-stone-50 p-3 rounded-lg border border-stone-100";
+                
+                let imgHtml = ex.photo ? `<img src="${ex.photo}" class="w-10 h-10 rounded object-cover border mr-3 click-zoom">` : `<div class="w-10 h-10 bg-stone-200 rounded mr-3 flex items-center justify-center text-stone-400"><i class="fas fa-receipt"></i></div>`;
+
+                div.innerHTML = `
+                    <div class="flex items-center">
+                        ${imgHtml}
+                        <div>
+                            <div class="font-bold text-sm text-muji-text">${ex.item}</div>
+                            <div class="text-[10px] text-stone-400">${ex.date}</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold text-muji-text">¥${ex.amount}</div>
+                        <div class="text-[10px] text-stone-400">≈ NT$${Math.round(ex.amount * rate)}</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('total-jpy').innerText = totalJPY.toLocaleString();
+            document.getElementById('total-twd').innerText = Math.round(totalJPY * rate).toLocaleString();
+        }
+
+        function clearExpenses() {
+            if(confirm("確定要清空所有記帳紀錄嗎？此動作無法復原。")) {
+                localStorage.removeItem('trip_expenses');
+                loadExpenses();
+            }
+        }
+
+        // ================= LISTS MODULE LOGIC =================
+        function initLists() {
+            loadChecklist();
+            loadMemo();
+
+            document.getElementById('memo-area').addEventListener('blur', saveMemo);
+        }
+
+        // Checklist
+        function addChecklist() {
+            const input = document.getElementById('checklist-input');
+            const text = input.value.trim();
+            if(!text) return;
+
+            const list = JSON.parse(localStorage.getItem('trip_checklist') || '[]');
+            list.push({ id: Date.now(), text, checked: false });
+            localStorage.setItem('trip_checklist', JSON.stringify(list));
+            
+            input.value = "";
+            loadChecklist();
+        }
+
+        function toggleCheck(id) {
+            const list = JSON.parse(localStorage.getItem('trip_checklist') || '[]');
+            const item = list.find(i => i.id === id);
+            if(item) {
+                item.checked = !item.checked;
+                localStorage.setItem('trip_checklist', JSON.stringify(list));
+                loadChecklist();
+            }
+        }
+
+        function deleteCheck(id) {
+            let list = JSON.parse(localStorage.getItem('trip_checklist') || '[]');
+            list = list.filter(i => i.id !== id);
+            localStorage.setItem('trip_checklist', JSON.stringify(list));
+            loadChecklist();
+        }
+
+        function loadChecklist() {
+            const list = JSON.parse(localStorage.getItem('trip_checklist') || '[]');
+            const container = document.getElementById('checklist-container');
+            container.innerHTML = "";
+
+            list.forEach(item => {
+                const li = document.createElement('li');
+                li.className = "flex items-center justify-between p-2 rounded hover:bg-stone-50";
+                li.innerHTML = `
+                    <div class="flex items-center space-x-3 cursor-pointer" onclick="toggleCheck(${item.id})">
+                        <div class="w-5 h-5 rounded border border-stone-300 flex items-center justify-center ${item.checked ? 'bg-muji-accent border-muji-accent' : 'bg-white'} transition-colors">
+                            ${item.checked ? '<i class="fas fa-check text-white text-xs"></i>' : ''}
+                        </div>
+                        <span class="${item.checked ? 'line-through text-stone-300' : 'text-muji-text'} text-sm">${item.text}</span>
+                    </div>
+                    <button onclick="deleteCheck(${item.id})" class="text-stone-300 hover:text-red-400 px-2"><i class="fas fa-times"></i></button>
+                `;
+                container.appendChild(li);
+            });
+        }
+
+        // Memo
+        function saveMemo() {
+            const text = document.getElementById('memo-area').value;
+            localStorage.setItem('trip_memo', text);
+            extractLinks(text);
+        }
+
+        function loadMemo() {
+            const text = localStorage.getItem('trip_memo') || "";
+            document.getElementById('memo-area').value = text;
+            extractLinks(text);
+        }
+
+        function extractLinks(text) {
+            const container = document.getElementById('memo-links');
+            container.innerHTML = "";
+            
+            // Regex to find URLs
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            const matches = text.match(urlRegex);
+
+            if(matches) {
+                matches.forEach(url => {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.target = "_blank";
+                    a.className = "bg-stone-200 text-stone-600 text-xs px-2 py-1 rounded-full hover:bg-stone-300 transition flex items-center";
+                    a.innerHTML = `<i class="fas fa-link mr-1"></i> 連結`;
+                    container.appendChild(a);
+                });
+            }
+        }
+
+    </script>
+</body>
+</html>
